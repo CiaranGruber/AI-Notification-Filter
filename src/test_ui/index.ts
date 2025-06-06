@@ -1,5 +1,6 @@
 import "./styles.css";
-import { classifyMessage, NotificationRequest, Message } from "../ai_api/ai";
+import { classifyMessage } from "../ai_api/ai";
+import { NotificationRequest, Message, NotificationResponse } from "../ai_api/types";
 
 declare const module: {
     hot?: {
@@ -81,7 +82,7 @@ function createMessageRow(message?: Message): HTMLDivElement {
         sender.value = message.sender;
     }
 
-    const content = document.createElement("input");
+    const content = document.createElement("textarea");
     content.placeholder = "Message content";
     content.className = "content";
     if (message) {
@@ -128,7 +129,7 @@ function getMessages(): Message[] {
     const rows = document.querySelectorAll(".message-row");
     return Array.from(rows).map(row => {
         const sender = (row.querySelector(".sender") as HTMLInputElement).value;
-        const content = (row.querySelector(".content") as HTMLInputElement).value;
+        const content = (row.querySelector(".content") as HTMLTextAreaElement).value;
         const timestamp = new Date((row.querySelector(".timestamp") as HTMLInputElement).value);
         return { timestamp, sender, content };
     });
@@ -183,11 +184,11 @@ function importMessages(elements: Elements): void {
  * @param {Elements} elements The DOM elements
  * @returns {Promise<void>}
  */
-async function runTest(elements: Elements): Promise<void> {
+function runTest(elements: Elements): void {
     const messages = getMessages();
     if (messages.length === 0) {
         elements.result.textContent = "No messages to classify";
-        return Promise.resolve();
+        return;
     }
 
     const messageToClassify = messages[messages.length - 1];
@@ -200,14 +201,20 @@ async function runTest(elements: Elements): Promise<void> {
             previousMessages
         };
         elements.result.textContent = "Determining response..."
-        const shouldShow = await classifyMessage(request);
-        elements.result.textContent = shouldShow ? "Yes" : "No";
-        return Promise.resolve();
+        classifyMessage(request).then(response => {
+            showResponse(response, elements);
+        });
     } catch (error) {
         console.error("Error running test:", error);
         elements.result.textContent = "Error occurred";
-        return Promise.resolve();
     }
+}
+
+function showResponse(response: NotificationResponse, elements: Elements): void {
+    elements.result.innerHTML = `<p>Notification shown: ${response.shouldReceive}</p>
+<p>Confidence: ${response.confidence}</p>
+<p>Priority: ${response.priority}</p>
+<p>Reason: ${response.reason}</p>`;
 }
 
 /**

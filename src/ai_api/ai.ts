@@ -1,3 +1,5 @@
+import { Message, NotificationRequest, NotificationResponse, Priority } from "./types";
+
 /**
  * @constant API_CONFIG
  * @description Configuration for the AI model API
@@ -26,11 +28,30 @@ The user will provide:
 2. A message to be classified
 3. Context of up to 10 previous messages
 
-Your response should be:
-- "y" if the message should be received as a notification
-- "n" if the message should not be received
+Your response should be in the following JSON format:
+{
+    "shouldReceive": "y" | "n",
+    "confidence": 0-100,
+    "priority": "H" | "M" | "L",
+    "reason": "short explanation of why you made your decision"
+}
 
-Only provide the letter "y" or "n" as the response and nothing else or the response will be rejected.`
+With the following details
+- shouldReceive should be replaced with either "y" or "n" indicating if the notification should be received
+- confidence should be replaced with an integer between 0 and 100 indicating how confident you are in your classification being either true or false
+- priority should be replaced with one of "H", "M", or "L" indicating the priority of the notification according to the user's preferences
+- reason should be replaced with a short explanation of why you made your decision as if you were talking to the user themselves. You should use 2nd-person conversational tone and not speak in third person. If the user identifies themselves, use "you" instead of their name, etc
+
+Do not provide any text other than the JSON object itself.
+
+Example answer:
+{
+    "shouldReceive": "y",
+    "confidence": 100,
+    "priority": "M",
+    "reason": "This aligns with your request to receive messages about recent products"
+}
+`
 } as const;
 
 /**
@@ -45,33 +66,7 @@ const CLEAN_UP_CONFIG = {
     model: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     maxTokens: 100,
     temperature: 0.2,
-    systemPrompt: `The given user message should have just been either "y" or "n" but it has extra information. Please remove the extra information.`
-}
-
-/**
- * @interface Message
- * @description Represents a chat message with timestamp, sender, and content
- * @property {Date} timestamp - When the message was sent
- * @property {string} sender - Who sent the message
- * @property {string} content - The message content
- */
-export interface Message {
-    timestamp: Date;
-    sender: string;
-    content: string;
-}
-
-/**
- * @interface NotificationRequest
- * @description Represents a request to classify a notification
- * @property {string} userDescription - Description of what types of messages the user wants to receive
- * @property {Message} messageToClassify - The message to be classified
- * @property {Message[]} previousMessages - Array of previous messages for context
- */
-export interface NotificationRequest {
-    userDescription: string;
-    messageToClassify: Message;
-    previousMessages: Message[];
+    systemPrompt: `The given user message should have been a JSON object but likely has additional text. Please remove the extra text.`
 }
 
 /**
@@ -104,42 +99,12 @@ ${previousMessages.map(formatMessage).join("\n")}`;
 }
 
 /**
- * @function getCleanedResponse
- * @description Cleans up the AI response to ensure it only contains the classification
- * @param {string} ai_response The raw response from the classification assistant
- * @returns {Promise<string>} Promise resolving to the cleaned response (y/n)
- * @throws {Error} If the API request fails or returns an error
- */
-async function getCleanedResponse(ai_response: string): Promise<string> {
-    const clean_up_response = await fetch("https://api.gmi-serving.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${process.env.GMI_API_KEY}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            model: CLEAN_UP_CONFIG.model,
-            messages: [
-                { role: "system", content: CLEAN_UP_CONFIG.systemPrompt },
-                { role: "user", content: ai_response }
-            ],
-            max_tokens: CLEAN_UP_CONFIG.maxTokens,
-            temperature: CLEAN_UP_CONFIG.temperature
-        })
-    });
-    const data = await clean_up_response.json();
-    // eslint-disable-next-line no-console
-    console.log("Clean Up Response:", data);
-    return data.choices[0].message.content;
-}
-
-/**
  * @function classifyMessage
  * @description Classifies a message based on previous messages and a filtering prompt
  * @param {NotificationRequest} request The notification request containing user description, message to classify, and previous messages
  * @returns {Promise<boolean>} Promise resolving to true if the message should be received as a notification
  */
-export async function classifyMessage(request: NotificationRequest): Promise<boolean> {
+export async function classifyMessage(request: NotificationRequest): Promise<NotificationResponse> {
     try {
         const messages = [
             { role: "system", content: API_CONFIG.systemPrompt },
@@ -170,20 +135,49 @@ export async function classifyMessage(request: NotificationRequest): Promise<boo
         // eslint-disable-next-line no-console
         console.log("API Response:", data);
 
-        let ai_response = data.choices[0].message.content;
-        for (let i = 0; i < 3; i++) {
-            if (ai_response === "y") {
-                return true;
-            } else if (ai_response === "n") {
-                return false;
-            }
-            // Clean up the response to remove extra information
-            ai_response = await getCleanedResponse(ai_response);
-        }
-        return false;
+        let ai_response = deserialiseResponse(data.choices[0].message.content);
+        return ai_response;
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error("API Error:", error);
-        return false;
+        return {
+            shouldReceive: false,
+            confidence: 0,
+            priority: Priority.LOW,
+            reason: "Error"
+        }
     }
 };
+
+/**
+ * @function deserialiseResponse
+ * @description Deserialises the response from the AI model into a NotificationResponse object
+ * @param {string} response The response from the AI model
+ * @returns {NotificationResponse} The deserialised response
+ */
+function deserialiseResponse(response: string): NotificationResponse {
+    // Clean and validate response format
+    response = cleanResponse(response);
+    
+    const json = JSON.parse(response);
+    return {
+        shouldReceive: json.shouldReceive === "y",
+        confidence: json.confidence,
+        priority: json.priority as Priority,
+        reason: json.reason
+    }
+}
+
+/**
+ * @function cleanResponse
+ * @description Cleans up the response to ensure it only contains the classification object
+ * @param {string} response The raw response from the classification assistant
+ * @returns {string} The cleaned response
+ */
+function cleanResponse(response: string): string {
+    const match = response.match(/.*```json(.*)```.*/s);
+    if (!match) {
+        throw new Error("No JSON content found in response");
+    }
+    return match[1].trim();
+}
