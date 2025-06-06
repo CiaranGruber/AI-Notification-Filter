@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Notification Filter</title>
+</head>
+<body>
+    <div class="container">
+        <h1>The AI Notification Filtering Tester</h1>
+        
+        <div class="form-group">
+            <label for="filterPrompt">Filtering prompt</label>
+            <textarea id="filterPrompt"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="chatMessages">Chat Messages</label>
+            <div class="messages-controls">
+                <button id="newMessage" class="button">New Message</button>
+            </div>
+            <div id="chatMessages" class="messages-list"></div>
+            <div class="import-export-controls">
+                <button id="importMessages" class="button">Import</button>
+                <button id="exportMessages" class="button">Export</button>
+            </div>
+            <textarea id="messagesData" class="messages-data" placeholder="Messages data for import/export"></textarea>
+        </div>
+
+        <div class="button-group">
+            <button id="runTest">Run test</button>
+            <button id="clearAll">Clear all</button>
+        </div>
+
+        <div class="output">
+            <label>Should output: (yes/no)</label>
+            <div id="result"></div>
+        </div>
+    </div>
+    <script src="bundle.js"></script>
+</body>
+</html> 
