@@ -9,7 +9,7 @@ import { Message, NotificationRequest, NotificationResponse, Priority } from "./
  * @property {string} systemPrompt - The system prompt that defines the model's behavior
  */
 const API_CONFIG = {
-    model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+    model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
     maxTokens: 1000,
     temperature: 0.2,
     systemPrompt: `You are a classification assistant that determines whether a user should receive a notification for a chat message.
@@ -20,6 +20,10 @@ In general, you should determine who is talking to whom and what the topic of th
 When evaluating the meaning of a message, you must consider the context of previous messages with the most recent messages being most important for context.
 
 Messages are ordered chronologically with the most recent message last.
+
+Your first step should be to break down the user description into their specific requirements. After breaking down requiements, then evaluate the messages accordingly. All user requirements are important.
+
+If you have very high confidence early on while reasoning, you can stop reasoning and return the answer quickly.
 
 If you are not sure about whether a message should be received given the user description, err on the side of receiving it.
 
@@ -40,7 +44,7 @@ With the following details
 - shouldReceive should be replaced with either "y" or "n" indicating if the notification should be received
 - confidence should be replaced with an integer between 0 and 100 indicating how confident you are in your classification being either true or false
 - priority should be replaced with one of "H", "M", or "L" indicating the priority of the notification according to the user's preferences
-- reason should be replaced with a short explanation of why you made your decision as if you were talking to the user themselves. You should use 2nd-person conversational tone and not speak in third person. If the user identifies themselves, use "you" instead of their name, etc
+- reason should be replaced with a short explanation of why you made your decision as if you were talking to the user themselves. You should explain your decision in past tense. You should use 2nd-person conversational tone and not speak in third person.
 
 Do not provide any text other than the JSON object itself.
 
@@ -55,28 +59,18 @@ Example answer:
 } as const;
 
 /**
- * @constant CLEAN_UP_CONFIG
- * @description Configuration for cleaning up AI responses
- * @property {string} model - The AI model to use for response cleanup
- * @property {number} maxTokens - Maximum number of tokens in the response
- * @property {number} temperature - Controls randomness in the model's output (0.2 = more focused)
- * @property {string} systemPrompt - The system prompt that defines the cleanup behavior
- */
-const CLEAN_UP_CONFIG = {
-    model: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
-    maxTokens: 100,
-    temperature: 0.2,
-    systemPrompt: `The given user message should have been a JSON object but likely has additional text. Please remove the extra text.`
-}
-
-/**
  * @function formatMessage
  * @description Formats a message object into a string representation
  * @param {Message} message The message to format
  * @returns {string} Formatted message string
  */
 function formatMessage(message: Message): string {
-    return `- (${message.timestamp.toISOString()}) ${message.sender}: ${message.content}`;
+    const date = message.timestamp;
+    const hours = date.getHours();
+    const ampm = hours >= 12 ? "pm" : "am";
+    const formattedHours = hours % 12 || 12;
+    const formattedDate = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} - ${String(formattedHours).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")} ${ampm}`;
+    return `- (${formattedDate}) ${message.sender}: ${message.content}`;
 }
 
 /**
@@ -159,12 +153,23 @@ function deserialiseResponse(response: string): NotificationResponse {
     // Clean and validate response format
     response = cleanResponse(response);
     
+    try {
     const json = JSON.parse(response);
     return {
         shouldReceive: json.shouldReceive === "y",
         confidence: json.confidence,
         priority: json.priority as Priority,
-        reason: json.reason
+            reason: json.reason
+        }
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error parsing JSON:", response, error);
+        return {
+            shouldReceive: false,
+            confidence: 0,
+            priority: Priority.LOW,
+            reason: "Error"
+        }
     }
 }
 
@@ -177,7 +182,7 @@ function deserialiseResponse(response: string): NotificationResponse {
 function cleanResponse(response: string): string {
     const match = response.match(/.*```json(.*)```.*/s);
     if (!match) {
-        throw new Error("No JSON content found in response");
+        return response;
     }
     return match[1].trim();
 }
