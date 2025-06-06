@@ -22,7 +22,112 @@ interface Elements {
     exportMessages: HTMLButtonElement;
     importMessages: HTMLButtonElement;
     messagesData: HTMLTextAreaElement;
+    prompt1: HTMLButtonElement;
+    prompt2: HTMLButtonElement;
+    prompt3: HTMLButtonElement;
+    example1: HTMLButtonElement;
+    example2: HTMLButtonElement;
+    example3: HTMLButtonElement;
 }
+
+/**
+ * Example data for the three example buttons
+ */
+const PROMPT_DATA = {
+    prompt1: "I am Bob. Only send notifications if Alice responds to me.",
+    prompt2: "Only show me sales messages",
+    prompt3: "I only want to receive the first message in each topic. I would like to be notified only for documentation-related messages and fun work activities",
+};
+
+const EXAMPLE_DATA = {
+    example1: [
+        {
+            timestamp: "2024-06-06T10:00:00.000Z",
+            sender: "Alice",
+            content: "Hey, are we still meeting for lunch today?"
+        },
+        {
+            timestamp: "2024-06-06T10:15:00.000Z",
+            sender: "Bob",
+            content: "Yes! Looking forward to it. See you at 12:30 at the cafe."
+        },
+        {
+            timestamp: "2024-06-06T11:45:00.000Z",
+            sender: "Alice",
+            content: "Running a bit late, will be there in 10 minutes!"
+        }
+    ],
+    example2: [
+        {
+            timestamp: "2024-06-06T14:30:00.000Z",
+            sender: "System",
+            content: "Your account password will expire in 7 days. Please update it."
+        },
+        {
+            timestamp: "2024-06-06T15:00:00.000Z",
+            sender: "Marketing",
+            content: "🎉 FLASH SALE! 50% off everything! Limited time only!"
+        },
+        {
+            timestamp: "2024-06-06T15:30:00.000Z",
+            sender: "Manager",
+            content: "Team meeting moved to 3 PM tomorrow. Please confirm attendance."
+        }
+    ],
+    example3: [
+        {
+          "timestamp": "2025-06-06T08:02:00.000Z",
+          "sender": "Rachel",
+          "content": "Morning folks — any blockers on the onboarding revamp before standup?"
+        },
+        {
+          "timestamp": "2025-06-06T08:04:00.000Z",
+          "sender": "Ciaran",
+          "content": "Just waiting on the copy from marketing, otherwise good to go on my end."
+        },
+        {
+          "timestamp": "2025-06-06T08:06:00.000Z",
+          "sender": "Leo",
+          "content": "I'll push the revised flowchart by 9, minor updates to the edge cases."
+        },
+        {
+          "timestamp": "2025-06-06T08:30:00.000Z",
+          "sender": "Nina",
+          "content": "Heads up — CI's failing on the main branch after the latest merge. Looks like a broken test suite for auth."
+        },
+        {
+          "timestamp": "2025-06-06T08:32:00.000Z",
+          "sender": "Ciaran",
+          "content": "That might be my patch from last night. I'll revert it and isolate the test cases."
+        },
+        {
+          "timestamp": "2025-06-06T08:35:00.000Z",
+          "sender": "Raj",
+          "content": "Make sure to clean up the flaky token mocks too — they've been intermittently failing for days."
+        },
+        {
+          "timestamp": "2025-06-06T09:01:00.000Z",
+          "sender": "Leo",
+          "content": "BTW, anyone got a link to the new linter rules doc? My formatter's yelling at everything this morning."
+        },
+        {
+          "timestamp": "2025-06-06T09:10:00.000Z",
+          "sender": "Nina",
+          "content": "Pinned it in #dev-notes yesterday — search 'prettier-rules-v3'"
+        },
+        {
+          "timestamp": "2025-06-06T10:00:00.000Z",
+          "sender": "Rachel",
+          "content": "On a less stressful note — trivia at lunch today. Prizes include eternal bragging rights and leftover donuts."
+        },
+        {
+          "timestamp": "2025-06-06T10:01:00.000Z",
+          "sender": "Raj",
+          "content": "If there's a round on obscure regex trivia, I'm sweeping it."
+        }
+      ]
+            
+};
 
 /**
  * @function getElements
@@ -39,7 +144,13 @@ function getElements(): Elements {
         clearAll: document.getElementById("clearAll") as HTMLButtonElement,
         exportMessages: document.getElementById("exportMessages") as HTMLButtonElement,
         importMessages: document.getElementById("importMessages") as HTMLButtonElement,
-        messagesData: document.getElementById("messagesData") as HTMLTextAreaElement
+        messagesData: document.getElementById("messagesData") as HTMLTextAreaElement,
+        prompt1: document.getElementById("prompt1") as HTMLButtonElement,
+        prompt2: document.getElementById("prompt2") as HTMLButtonElement,
+        prompt3: document.getElementById("prompt3") as HTMLButtonElement,
+        example1: document.getElementById("example1") as HTMLButtonElement,
+        example2: document.getElementById("example2") as HTMLButtonElement,
+        example3: document.getElementById("example3") as HTMLButtonElement
     };
 }
 
@@ -52,6 +163,44 @@ function getElements(): Elements {
 function createMessageRow(message?: Message): HTMLDivElement {
     const row = document.createElement("div");
     row.className = "message-row";
+
+    // Create profile picture
+    const profilePic = document.createElement("div");
+    profilePic.className = "profile-pic";
+    
+    // Generate initials from sender name
+    const getInitials = (name: string): string => {
+        if (!name) return "?";
+        return name.split(" ")
+            .map(word => word.charAt(0).toUpperCase())
+            .slice(0, 2)
+            .join("");
+    };
+    
+    // Generate color based on sender name
+    const getProfileColor = (name: string): string => {
+        if (!name) return "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+        const colors = [
+            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+            "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+            "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+            "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+            "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+            "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
+            "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)"
+        ];
+        const hash = name.split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+        }, 0);
+        return colors[Math.abs(hash) % colors.length];
+    };
+    
+    profilePic.textContent = message ? getInitials(message.sender) : "?";
+    if (message) {
+        profilePic.style.background = getProfileColor(message.sender);
+    }
 
     const timestamp = document.createElement("input");
     timestamp.type = "datetime-local";
@@ -81,6 +230,39 @@ function createMessageRow(message?: Message): HTMLDivElement {
     if (message) {
         sender.value = message.sender;
     }
+    
+    // Update profile picture when sender changes
+    sender.addEventListener("input", () => {
+        const getInitials = (name: string): string => {
+            if (!name) return "?";
+            return name.split(" ")
+                .map(word => word.charAt(0).toUpperCase())
+                .slice(0, 2)
+                .join("");
+        };
+        
+        const getProfileColor = (name: string): string => {
+            if (!name) return "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+            const colors = [
+                "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+                "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+                "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+                "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+                "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
+                "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)"
+            ];
+            const hash = name.split('').reduce((a, b) => {
+                a = ((a << 5) - a) + b.charCodeAt(0);
+                return a & a;
+            }, 0);
+            return colors[Math.abs(hash) % colors.length];
+        };
+        
+        profilePic.textContent = getInitials(sender.value);
+        profilePic.style.background = getProfileColor(sender.value);
+    });
 
     const content = document.createElement("textarea");
     content.placeholder = "Message content";
@@ -115,7 +297,7 @@ function createMessageRow(message?: Message): HTMLDivElement {
     removeButton.onclick = () => row.remove();
 
     controls.append(upButton, downButton, removeButton);
-    row.append(timestamp, sender, content, controls);
+    row.append(profilePic, timestamp, sender, content, controls);
 
     return row;
 }
@@ -176,6 +358,29 @@ function importMessages(elements: Elements): void {
         console.error("Error importing messages:", error);
         elements.result.textContent = "Error importing messages";
     }
+}
+
+
+/**
+ * @function loadExample
+ * @description Loads example data into the messages data textarea
+ * @param {Elements} elements The DOM elements
+ * @param {keyof typeof EXAMPLE_DATA} exampleKey The example key to load
+ */
+function loadPrompt(elements: Elements, exampleKey: keyof typeof PROMPT_DATA): void {
+    const exampleData = PROMPT_DATA[exampleKey];
+    elements.filterPrompt.value = exampleData
+}
+
+/**
+ * @function loadExample
+ * @description Loads example data into the messages data textarea
+ * @param {Elements} elements The DOM elements
+ * @param {keyof typeof EXAMPLE_DATA} exampleKey The example key to load
+ */
+function loadExample(elements: Elements, exampleKey: keyof typeof EXAMPLE_DATA): void {
+    const exampleData = EXAMPLE_DATA[exampleKey];
+    elements.messagesData.value = JSON.stringify(exampleData, null, 2);
 }
 
 /**
@@ -241,12 +446,28 @@ function setupEventListeners(elements: Elements): void {
     const newClearAll = elements.clearAll.cloneNode(true);
     const newExportMessages = elements.exportMessages.cloneNode(true);
     const newImportMessages = elements.importMessages.cloneNode(true);
+
+    const newPrompt1 = elements.prompt1.cloneNode(true);
+    const newPrompt2 = elements.prompt2.cloneNode(true);
+    const newPrompt3 = elements.prompt3.cloneNode(true);
+
+    const newExample1 = elements.example1.cloneNode(true);
+    const newExample2 = elements.example2.cloneNode(true);
+    const newExample3 = elements.example3.cloneNode(true);
     
     elements.newMessage.parentNode?.replaceChild(newNewMessage, elements.newMessage);
     elements.runTest.parentNode?.replaceChild(newRunTest, elements.runTest);
     elements.clearAll.parentNode?.replaceChild(newClearAll, elements.clearAll);
     elements.exportMessages.parentNode?.replaceChild(newExportMessages, elements.exportMessages);
     elements.importMessages.parentNode?.replaceChild(newImportMessages, elements.importMessages);
+
+    elements.prompt1.parentNode?.replaceChild(newPrompt1, elements.prompt1);
+    elements.prompt2.parentNode?.replaceChild(newPrompt2, elements.prompt2);
+    elements.prompt3.parentNode?.replaceChild(newPrompt3, elements.prompt3);
+
+    elements.example1.parentNode?.replaceChild(newExample1, elements.example1);
+    elements.example2.parentNode?.replaceChild(newExample2, elements.example2);
+    elements.example3.parentNode?.replaceChild(newExample3, elements.example3);
 
     // Add event listeners to the new elements
     newNewMessage.addEventListener("click", () => {
@@ -257,6 +478,13 @@ function setupEventListeners(elements: Elements): void {
     newClearAll.addEventListener("click", () => clearAll(elements));
     newExportMessages.addEventListener("click", () => exportMessages(elements));
     newImportMessages.addEventListener("click", () => importMessages(elements));
+    newPrompt1.addEventListener("click", () => loadPrompt(elements, "prompt1"));
+    newPrompt2.addEventListener("click", () => loadPrompt(elements, "prompt2"));
+    newPrompt3.addEventListener("click", () => loadPrompt(elements, "prompt3"));
+
+    newExample1.addEventListener("click", () => loadExample(elements, "example1"));
+    newExample2.addEventListener("click", () => loadExample(elements, "example2"));
+    newExample3.addEventListener("click", () => loadExample(elements, "example3"));
 }
 
 /**

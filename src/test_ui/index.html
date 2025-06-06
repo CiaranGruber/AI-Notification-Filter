@@ -4,13 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Notification Filter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <h1>The AI Slack Notification Filtering Tester</h1>
     <div class="container">
-        <h1>The AI Notification Filtering Tester</h1>
         
         <div class="form-group">
             <label for="filterPrompt">Filtering prompt</label>
+            <div class="example-buttons">
+                <button id="prompt1" class="button">Example 1</button>
+                <button id="prompt2" class="button">Example 2</button>
+                <button id="prompt3" class="button">Example 3</button>
+            </div>
+            <div id="justWhiteSpace">
+                <p><br></p>
+            </div>
             <textarea id="filterPrompt"></textarea>
         </div>
 
@@ -23,6 +33,11 @@
             <div class="import-export-controls">
                 <button id="importMessages" class="button">Import</button>
                 <button id="exportMessages" class="button">Export</button>
+                <div class="example-buttons">
+                    <button id="example1" class="button">Example 1</button>
+                    <button id="example2" class="button">Example 2</button>
+                    <button id="example3" class="button">Example 3</button>
+                </div>
             </div>
             <textarea id="messagesData" class="messages-data" placeholder="Messages data for import/export"></textarea>
         </div>
@@ -39,4 +54,4 @@
     </div>
     <script src="bundle.js"></script>
 </body>
-</html> 
+</html>

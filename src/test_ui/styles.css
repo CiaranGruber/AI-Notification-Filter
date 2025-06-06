@@ -1,110 +1,476 @@
-body {
-  font-family: Arial, sans-serif;
+/* Modern CSS Reset and Base Styles */
+* {
   margin: 0;
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+:root {
+  --primary-color: #6366f1;
+  --primary-hover: #4f46e5;
+  --secondary-color: #10b981;
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --border-hover: #475569;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --glass-bg: rgba(30, 41, 59, 0.8);
+  --glass-border: rgba(148, 163, 184, 0.2);
+}
+
+body {
+  padding-top: 100px;
+  font-family: 'Albert Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--background);
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+  min-height: 100vh;
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
 }
 
 .container {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 4rem;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 h1 {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
   text-align: center;
-  margin-bottom: 30px;
-  color: #333;
+  margin-bottom: 4rem;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: var(--gradient-1);
+  border-radius: 2px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.form-group:nth-child(even) {
+  animation-delay: 0.1s;
 }
 
 label {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 0.75rem;
+  margin-left: 1rem;
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  position: relative;
+}
+
+label::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: var(--gradient-1);
+  border-radius: 2px;
+}
+
+textarea, input[type="text"], input[type="datetime-local"] {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'Albert Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s ease;
+  resize: vertical;
 }
 
 textarea {
-  width: 100%;
-  min-height: 100px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  resize: vertical;
+  min-height: 120px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+textarea:focus, input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
 }
 
 .button-group {
   display: flex;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.justWhiteSpace{
+  margin-top: 50px;
 }
 
 button {
-  padding: 8px 16px;
-  background-color: #007bff;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Albert Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+button:hover::before {
+  left: 100%;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+#runTest {
+  background: var(--secondary-color);
+  background-image: var(--gradient-1);
+}
+
+#runTest:hover {
+  background-image: var(--gradient-1);
+  filter: brightness(1.1);
+}
+
+#clearAll {
+  background: var(--error);
+}
+
+#clearAll:hover {
+  background: #dc2626;
 }
 
 .output {
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  min-height: 50px;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  min-height: 100px;
+  position: relative;
+  overflow: hidden;
 }
 
-.messages-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+.output::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-1);
 }
 
-.import-export-controls {
+.output label {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-left: 0;
+  margin-bottom: 1rem;
+}
+
+.output label::before {
+  display: none;
+}
+
+.output p {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Albert Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.output p:first-child {
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.messages-controls, .import-export-controls {
   display: flex;
-  gap: 10px;
-  margin: 10px 0;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.messages-controls button, .import-export-controls button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  min-width: auto;
+}
+
+.example-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.example-buttons button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  background: var(--warning);
+  min-width: auto;
+}
+
+.example-buttons button:hover {
+  background: #d97706;
 }
 
 .messages-list {
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.messages-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-list::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.messages-list::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
 }
 
 .messages-data {
   min-height: 100px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
 }
 
 .message-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 140px 100px 1fr auto;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  align-items: start;
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.message-row:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .message-row input, .message-row textarea {
-  flex: 1;
+  margin: 0;
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
 }
 
 .message-row textarea {
   min-height: 60px;
+  resize: vertical;
 }
 
 .message-controls {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .message-controls button {
-  padding: 4px 8px;
-  font-size: 12px;
-} 
+  padding: 0.4rem;
+  font-size: 0.9rem;
+  min-width: 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-controls button:nth-child(1) {
+  background: var(--secondary-color);
+}
+
+.message-controls button:nth-child(2) {
+  background: var(--warning);
+}
+
+.message-controls button:nth-child(3) {
+  background: var(--error);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 2rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  .message-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .message-controls {
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  button {
+    width: 100%;
+  }
+}
+
+/* Loading Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Improved Focus Indicators */
+button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Glass Morphism Enhancement */
+.form-group:nth-child(odd) {
+  background: rgba(99, 102, 241, 0.05);
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+
+.message-row {
+  display: grid;
+  grid-template-columns: 40px 140px 100px 1fr auto;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  align-items: start;
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease-out;
+}
