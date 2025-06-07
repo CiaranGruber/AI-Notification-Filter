@@ -451,6 +451,10 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.profile-pic {
+  text-align: center;
+}
+
 /* Glass Morphism Enhancement */
 .form-group:nth-child(odd) {
   background: rgba(99, 102, 241, 0.05);
