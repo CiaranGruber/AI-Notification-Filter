@@ -39,7 +39,7 @@ The following people helped develop the program:
 
 ## Licence
 
-See the [Licence](./LICENCE) file for more information. If not present, this repository at its current state is licenced under the standard MIT licence
+See the [Licence](./LICENSE) file for more information. If not present, this repository at its current state is licenced under the standard MIT licence
 
 ## Project Status
 
